@@ -13,13 +13,15 @@ namespace PerfDiagnosticListener
         private static long _requestsEnded = 0;
         private static long _requestTicks = 0;
 
+        private static readonly object _requestInfoKey = new object();
+
         [DiagnosticName("Microsoft.AspNetCore.Hosting.BeginRequest")]
         public void OnBeginRequest(HttpContext httpContext, long timestamp)
         {
             Interlocked.Increment(ref _requestsBegan);
 
             var requestInfo = new RequestInfo { BeginTimestamp = timestamp };
-            httpContext.Features.Set(requestInfo);
+            httpContext.Items[_requestInfoKey] = requestInfo;
         }
 
         [DiagnosticName("Microsoft.AspNetCore.Hosting.EndRequest")]
@@ -27,7 +29,7 @@ namespace PerfDiagnosticListener
         {
             Interlocked.Increment(ref _requestsEnded);
 
-            var requestInfo = httpContext.Features.Get<RequestInfo>();
+            var requestInfo = (RequestInfo)httpContext.Items[_requestInfoKey];
             Interlocked.Add(ref _requestTicks, timestamp - requestInfo.BeginTimestamp);
         }
 
