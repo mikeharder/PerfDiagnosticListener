@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,8 +21,11 @@ namespace PerfDiagnosticListener
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory,
+            DiagnosticListener diagnosticListener)
         {
+            diagnosticListener.SubscribeWithAdapter(new PerfDiagnosticListener());
+
             loggerFactory.AddConsole();
 
             if (env.IsDevelopment())
